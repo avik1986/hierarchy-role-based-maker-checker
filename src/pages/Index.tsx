@@ -1,13 +1,54 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from 'react';
+import { Sidebar } from '@/components/Sidebar';
+import { Dashboard } from '@/components/Dashboard';
+import { CategoryHierarchy } from '@/components/CategoryHierarchy';
+import { GeographyHierarchy } from '@/components/GeographyHierarchy';
+import { RolesHierarchy } from '@/components/RolesHierarchy';
+import { UserManagement } from '@/components/UserManagement';
+import { AttributeManagement } from '@/components/AttributeManagement';
+import { EntityManagement } from '@/components/EntityManagement';
+import { ApprovalRules } from '@/components/ApprovalRules';
+import { ApprovalWorkflow } from '@/components/ApprovalWorkflow';
+import { UserProvider } from '@/contexts/UserContext';
 
 const Index = () => {
+  const [currentModule, setCurrentModule] = useState('dashboard');
+
+  const renderModule = () => {
+    switch (currentModule) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'categories':
+        return <CategoryHierarchy />;
+      case 'geography':
+        return <GeographyHierarchy />;
+      case 'roles':
+        return <RolesHierarchy />;
+      case 'users':
+        return <UserManagement />;
+      case 'attributes':
+        return <AttributeManagement />;
+      case 'entities':
+        return <EntityManagement />;
+      case 'approval-rules':
+        return <ApprovalRules />;
+      case 'approvals':
+        return <ApprovalWorkflow />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <UserProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+        <Sidebar currentModule={currentModule} onModuleChange={setCurrentModule} />
+        <main className="flex-1 p-6">
+          {renderModule()}
+        </main>
       </div>
-    </div>
+    </UserProvider>
   );
 };
 
