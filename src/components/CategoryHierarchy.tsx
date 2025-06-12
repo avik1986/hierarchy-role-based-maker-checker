@@ -39,7 +39,7 @@ export const CategoryHierarchy = () => {
     if (editingCategory) {
       setCategories(prev => prev.map(cat => 
         cat.id === editingCategory.id 
-          ? { ...cat, name: formData.name, parentId: formData.parentId || undefined }
+          ? { ...cat, name: formData.name, parentId: formData.parentId === 'none' ? undefined : formData.parentId }
           : cat
       ));
       toast({ title: "Category updated successfully!" });
@@ -47,8 +47,8 @@ export const CategoryHierarchy = () => {
       const newCategory: Category = {
         id: Date.now().toString(),
         name: formData.name,
-        parentId: formData.parentId || undefined,
-        level: formData.parentId ? (categories.find(c => c.id === formData.parentId)?.level || 0) + 1 : 0,
+        parentId: formData.parentId === 'none' ? undefined : formData.parentId,
+        level: formData.parentId && formData.parentId !== 'none' ? (categories.find(c => c.id === formData.parentId)?.level || 0) + 1 : 0,
       };
       setCategories(prev => [...prev, newCategory]);
       toast({ title: "Category created successfully!" });
@@ -61,7 +61,7 @@ export const CategoryHierarchy = () => {
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
-    setFormData({ name: category.name, parentId: category.parentId || '' });
+    setFormData({ name: category.name, parentId: category.parentId || 'none' });
     setIsDialogOpen(true);
   };
 
@@ -144,7 +144,7 @@ export const CategoryHierarchy = () => {
                     <SelectValue placeholder="Select parent category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None (Root Category)</SelectItem>
+                    <SelectItem value="none">None (Root Category)</SelectItem>
                     {categories.map(category => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name} (Level {category.level})

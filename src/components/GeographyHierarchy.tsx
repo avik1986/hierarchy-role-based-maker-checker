@@ -39,7 +39,7 @@ export const GeographyHierarchy = () => {
     if (editingGeography) {
       setGeographies(prev => prev.map(geo => 
         geo.id === editingGeography.id 
-          ? { ...geo, name: formData.name, type: formData.type, parentId: formData.parentId || undefined }
+          ? { ...geo, name: formData.name, type: formData.type, parentId: formData.parentId === 'none' ? undefined : formData.parentId }
           : geo
       ));
       toast({ title: "Geography updated successfully!" });
@@ -48,8 +48,8 @@ export const GeographyHierarchy = () => {
         id: Date.now().toString(),
         name: formData.name,
         type: formData.type,
-        parentId: formData.parentId || undefined,
-        level: formData.parentId ? (geographies.find(g => g.id === formData.parentId)?.level || 0) + 1 : 0,
+        parentId: formData.parentId === 'none' ? undefined : formData.parentId,
+        level: formData.parentId && formData.parentId !== 'none' ? (geographies.find(g => g.id === formData.parentId)?.level || 0) + 1 : 0,
       };
       setGeographies(prev => [...prev, newGeography]);
       toast({ title: "Geography created successfully!" });
@@ -62,7 +62,7 @@ export const GeographyHierarchy = () => {
 
   const handleEdit = (geography: Geography) => {
     setEditingGeography(geography);
-    setFormData({ name: geography.name, type: geography.type, parentId: geography.parentId || '' });
+    setFormData({ name: geography.name, type: geography.type, parentId: geography.parentId || 'none' });
     setIsDialogOpen(true);
   };
 
@@ -172,7 +172,7 @@ export const GeographyHierarchy = () => {
                     <SelectValue placeholder="Select parent location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None (Root Location)</SelectItem>
+                    <SelectItem value="none">None (Root Location)</SelectItem>
                     {geographies.map(geography => (
                       <SelectItem key={geography.id} value={geography.id}>
                         {geography.name} ({geography.type})

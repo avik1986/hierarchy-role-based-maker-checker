@@ -41,7 +41,7 @@ export const RolesHierarchy = () => {
     if (editingRole) {
       setRoles(prev => prev.map(role => 
         role.id === editingRole.id 
-          ? { ...role, name: formData.name, department: formData.department, parentId: formData.parentId || undefined }
+          ? { ...role, name: formData.name, department: formData.department, parentId: formData.parentId === 'none' ? undefined : formData.parentId }
           : role
       ));
       toast({ title: "Role updated successfully!" });
@@ -50,8 +50,8 @@ export const RolesHierarchy = () => {
         id: Date.now().toString(),
         name: formData.name,
         department: formData.department,
-        parentId: formData.parentId || undefined,
-        level: formData.parentId ? (roles.find(r => r.id === formData.parentId)?.level || 0) + 1 : 0,
+        parentId: formData.parentId === 'none' ? undefined : formData.parentId,
+        level: formData.parentId && formData.parentId !== 'none' ? (roles.find(r => r.id === formData.parentId)?.level || 0) + 1 : 0,
       };
       setRoles(prev => [...prev, newRole]);
       toast({ title: "Role created successfully!" });
@@ -64,7 +64,7 @@ export const RolesHierarchy = () => {
 
   const handleEdit = (role: Role) => {
     setEditingRole(role);
-    setFormData({ name: role.name, department: role.department, parentId: role.parentId || '' });
+    setFormData({ name: role.name, department: role.department, parentId: role.parentId || 'none' });
     setIsDialogOpen(true);
   };
 
@@ -176,7 +176,7 @@ export const RolesHierarchy = () => {
                     <SelectValue placeholder="Select parent role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None (Top Level)</SelectItem>
+                    <SelectItem value="none">None (Top Level)</SelectItem>
                     {roles.map(role => (
                       <SelectItem key={role.id} value={role.id}>
                         {role.name} ({role.department})
