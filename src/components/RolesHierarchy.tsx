@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,27 +30,51 @@ export const RolesHierarchy = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
-  const [formData, setFormData] = useState({ name: '', department: '', parentId: '' });
+  const [formData, setFormData] = useState({ name: '', department: '', parentId: 'none' });
 
   const departments = ['Executive', 'Sales', 'Finance', 'Operations', 'HR', 'IT', 'Marketing'];
+
+  const calculateLevel = (parentId?: string): number => {
+    if (!parentId || parentId === 'none') return 0;
+    const parent = roles.find(r => r.id === parentId);
+    return parent ? parent.level + 1 : 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.name.trim()) {
+      toast({ title: "Role name is required!", variant: "destructive" });
+      return;
+    }
+    
+    if (!formData.department) {
+      toast({ title: "Department is required!", variant: "destructive" });
+      return;
+    }
+    
     if (editingRole) {
+      const newLevel = calculateLevel(formData.parentId === 'none' ? undefined : formData.parentId);
       setRoles(prev => prev.map(role => 
         role.id === editingRole.id 
-          ? { ...role, name: formData.name, department: formData.department, parentId: formData.parentId === 'none' ? undefined : formData.parentId }
+          ? { 
+              ...role, 
+              name: formData.name.trim(), 
+              department: formData.department, 
+              parentId: formData.parentId === 'none' ? undefined : formData.parentId,
+              level: newLevel
+            }
           : role
       ));
       toast({ title: "Role updated successfully!" });
     } else {
+      const newLevel = calculateLevel(formData.parentId === 'none' ? undefined : formData.parentId);
       const newRole: Role = {
         id: Date.now().toString(),
-        name: formData.name,
+        name: formData.name.trim(),
         department: formData.department,
         parentId: formData.parentId === 'none' ? undefined : formData.parentId,
-        level: formData.parentId && formData.parentId !== 'none' ? (roles.find(r => r.id === formData.parentId)?.level || 0) + 1 : 0,
+        level: newLevel,
       };
       setRoles(prev => [...prev, newRole]);
       toast({ title: "Role created successfully!" });
@@ -59,7 +82,7 @@ export const RolesHierarchy = () => {
     
     setIsDialogOpen(false);
     setEditingRole(null);
-    setFormData({ name: '', department: '', parentId: '' });
+    setFormData({ name: '', department: '', parentId: 'none' });
   };
 
   const handleEdit = (role: Role) => {
@@ -69,7 +92,14 @@ export const RolesHierarchy = () => {
   };
 
   const handleDelete = (roleId: string) => {
-    setRoles(prev => prev.filter(role => role.id !== roleId && role.parentId !== roleId));
+    // Check if role has children
+    const hasChildren = roles.some(role => role.parentId === roleId);
+    if (hasChildren) {
+      toast({ title: "Cannot delete role with sub-roles!", variant: "destructive" });
+      return;
+    }
+    
+    setRoles(prev => prev.filter(role => role.id !== roleId));
     toast({ title: "Role deleted successfully!" });
   };
 
@@ -90,7 +120,7 @@ export const RolesHierarchy = () => {
     return roles
       .filter(role => role.parentId === parentId)
       .map(role => (
-        <div key={role.id} className={`ml-${level * 6}`}>
+        <div key={role.id} style={{ marginLeft: `${level * 24}px` }}>
           <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 mb-2 hover:shadow-md transition-all">
             <div className="flex items-center gap-3">
               <Users size={18} className="text-blue-600" />
@@ -177,11 +207,13 @@ export const RolesHierarchy = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None (Top Level)</SelectItem>
-                    {roles.map(role => (
-                      <SelectItem key={role.id} value={role.id}>
-                        {role.name} ({role.department})
-                      </SelectItem>
-                    ))}
+                    {roles
+                      .filter(role => editingRole ? role.id !== editingRole.id : true)
+                      .map(role => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name} ({role.department})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

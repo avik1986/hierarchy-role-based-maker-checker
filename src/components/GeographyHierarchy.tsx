@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,25 +30,44 @@ export const GeographyHierarchy = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingGeography, setEditingGeography] = useState<Geography | null>(null);
-  const [formData, setFormData] = useState({ name: '', type: 'country' as Geography['type'], parentId: '' });
+  const [formData, setFormData] = useState({ name: '', type: 'country' as Geography['type'], parentId: 'none' });
+
+  const calculateLevel = (parentId?: string): number => {
+    if (!parentId || parentId === 'none') return 0;
+    const parent = geographies.find(g => g.id === parentId);
+    return parent ? parent.level + 1 : 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.name.trim()) {
+      toast({ title: "Location name is required!", variant: "destructive" });
+      return;
+    }
+    
     if (editingGeography) {
+      const newLevel = calculateLevel(formData.parentId === 'none' ? undefined : formData.parentId);
       setGeographies(prev => prev.map(geo => 
         geo.id === editingGeography.id 
-          ? { ...geo, name: formData.name, type: formData.type, parentId: formData.parentId === 'none' ? undefined : formData.parentId }
+          ? { 
+              ...geo, 
+              name: formData.name.trim(), 
+              type: formData.type, 
+              parentId: formData.parentId === 'none' ? undefined : formData.parentId,
+              level: newLevel
+            }
           : geo
       ));
       toast({ title: "Geography updated successfully!" });
     } else {
+      const newLevel = calculateLevel(formData.parentId === 'none' ? undefined : formData.parentId);
       const newGeography: Geography = {
         id: Date.now().toString(),
-        name: formData.name,
+        name: formData.name.trim(),
         type: formData.type,
         parentId: formData.parentId === 'none' ? undefined : formData.parentId,
-        level: formData.parentId && formData.parentId !== 'none' ? (geographies.find(g => g.id === formData.parentId)?.level || 0) + 1 : 0,
+        level: newLevel,
       };
       setGeographies(prev => [...prev, newGeography]);
       toast({ title: "Geography created successfully!" });
@@ -57,7 +75,7 @@ export const GeographyHierarchy = () => {
     
     setIsDialogOpen(false);
     setEditingGeography(null);
-    setFormData({ name: '', type: 'country', parentId: '' });
+    setFormData({ name: '', type: 'country', parentId: 'none' });
   };
 
   const handleEdit = (geography: Geography) => {
@@ -67,7 +85,14 @@ export const GeographyHierarchy = () => {
   };
 
   const handleDelete = (geographyId: string) => {
-    setGeographies(prev => prev.filter(geo => geo.id !== geographyId && geo.parentId !== geographyId));
+    // Check if geography has children
+    const hasChildren = geographies.some(geo => geo.parentId === geographyId);
+    if (hasChildren) {
+      toast({ title: "Cannot delete location with sub-locations!", variant: "destructive" });
+      return;
+    }
+    
+    setGeographies(prev => prev.filter(geo => geo.id !== geographyId));
     toast({ title: "Geography deleted successfully!" });
   };
 
@@ -85,7 +110,7 @@ export const GeographyHierarchy = () => {
     return geographies
       .filter(geo => geo.parentId === parentId)
       .map(geography => (
-        <div key={geography.id} className={`ml-${level * 6}`}>
+        <div key={geography.id} style={{ marginLeft: `${level * 24}px` }}>
           <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 mb-2 hover:shadow-md transition-all">
             <div className="flex items-center gap-3">
               <MapPin size={18} className="text-blue-600" />
@@ -173,11 +198,13 @@ export const GeographyHierarchy = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None (Root Location)</SelectItem>
-                    {geographies.map(geography => (
-                      <SelectItem key={geography.id} value={geography.id}>
-                        {geography.name} ({geography.type})
-                      </SelectItem>
-                    ))}
+                    {geographies
+                      .filter(geography => editingGeography ? geography.id !== editingGeography.id : true)
+                      .map(geography => (
+                        <SelectItem key={geography.id} value={geography.id}>
+                          {geography.name} ({geography.type})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

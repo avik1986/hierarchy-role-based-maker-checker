@@ -1,71 +1,53 @@
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type UserRole = 'maker' | 'checker' | 'admin' | 'viewer';
+export type UserRole = 'admin' | 'maker' | 'checker' | 'viewer';
 
-export interface User {
+interface User {
   id: string;
   name: string;
   email: string;
-  phone: string;
   role: UserRole;
-  geographyId?: string;
-  categoryId?: string;
 }
 
 interface UserContextType {
   currentUser: User;
-  setCurrentUser: (user: User) => void;
   users: User[];
   setUsers: (users: User[]) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
+interface UserProviderProps {
+  children: ReactNode;
+}
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User>({
+export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+  const [currentUser] = useState<User>({
     id: '1',
     name: 'John Admin',
     email: 'admin@company.com',
-    phone: '+1234567890',
-    role: 'admin',
+    role: 'admin'
   });
 
   const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'John Admin',
-      email: 'admin@company.com',
-      phone: '+1234567890',
-      role: 'admin',
-    },
-    {
-      id: '2',
-      name: 'Jane Maker',
-      email: 'maker@company.com',
-      phone: '+1234567891',
-      role: 'maker',
-    },
-    {
-      id: '3',
-      name: 'Bob Checker',
-      email: 'checker@company.com',
-      phone: '+1234567892',
-      role: 'checker',
-    },
+    { id: '1', name: 'John Admin', email: 'admin@company.com', role: 'admin' },
+    { id: '2', name: 'Jane Maker', email: 'maker@company.com', role: 'maker' },
+    { id: '3', name: 'Bob Checker', email: 'checker@company.com', role: 'checker' },
+    { id: '4', name: 'Alice Viewer', email: 'viewer@company.com', role: 'viewer' },
   ]);
 
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser, users, setUsers }}>
+    <UserContext.Provider value={{ currentUser, users, setUsers }}>
       {children}
     </UserContext.Provider>
   );
+};
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
 };

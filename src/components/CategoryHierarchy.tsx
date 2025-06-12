@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,24 +30,42 @@ export const CategoryHierarchy = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [formData, setFormData] = useState({ name: '', parentId: '' });
+  const [formData, setFormData] = useState({ name: '', parentId: 'none' });
+
+  const calculateLevel = (parentId?: string): number => {
+    if (!parentId || parentId === 'none') return 0;
+    const parent = categories.find(c => c.id === parentId);
+    return parent ? parent.level + 1 : 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.name.trim()) {
+      toast({ title: "Category name is required!", variant: "destructive" });
+      return;
+    }
+    
     if (editingCategory) {
+      const newLevel = calculateLevel(formData.parentId === 'none' ? undefined : formData.parentId);
       setCategories(prev => prev.map(cat => 
         cat.id === editingCategory.id 
-          ? { ...cat, name: formData.name, parentId: formData.parentId === 'none' ? undefined : formData.parentId }
+          ? { 
+              ...cat, 
+              name: formData.name.trim(), 
+              parentId: formData.parentId === 'none' ? undefined : formData.parentId,
+              level: newLevel
+            }
           : cat
       ));
       toast({ title: "Category updated successfully!" });
     } else {
+      const newLevel = calculateLevel(formData.parentId === 'none' ? undefined : formData.parentId);
       const newCategory: Category = {
         id: Date.now().toString(),
-        name: formData.name,
+        name: formData.name.trim(),
         parentId: formData.parentId === 'none' ? undefined : formData.parentId,
-        level: formData.parentId && formData.parentId !== 'none' ? (categories.find(c => c.id === formData.parentId)?.level || 0) + 1 : 0,
+        level: newLevel,
       };
       setCategories(prev => [...prev, newCategory]);
       toast({ title: "Category created successfully!" });
@@ -56,7 +73,7 @@ export const CategoryHierarchy = () => {
     
     setIsDialogOpen(false);
     setEditingCategory(null);
-    setFormData({ name: '', parentId: '' });
+    setFormData({ name: '', parentId: 'none' });
   };
 
   const handleEdit = (category: Category) => {
@@ -66,7 +83,14 @@ export const CategoryHierarchy = () => {
   };
 
   const handleDelete = (categoryId: string) => {
-    setCategories(prev => prev.filter(cat => cat.id !== categoryId && cat.parentId !== categoryId));
+    // Check if category has children
+    const hasChildren = categories.some(cat => cat.parentId === categoryId);
+    if (hasChildren) {
+      toast({ title: "Cannot delete category with subcategories!", variant: "destructive" });
+      return;
+    }
+    
+    setCategories(prev => prev.filter(cat => cat.id !== categoryId));
     toast({ title: "Category deleted successfully!" });
   };
 
@@ -74,7 +98,7 @@ export const CategoryHierarchy = () => {
     return categories
       .filter(cat => cat.parentId === parentId)
       .map(category => (
-        <div key={category.id} className={`ml-${level * 6}`}>
+        <div key={category.id} style={{ marginLeft: `${level * 24}px` }}>
           <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 mb-2 hover:shadow-md transition-all">
             <div className="flex items-center gap-3">
               <FolderTree size={18} className="text-blue-600" />
@@ -145,11 +169,13 @@ export const CategoryHierarchy = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None (Root Category)</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name} (Level {category.level})
-                      </SelectItem>
-                    ))}
+                    {categories
+                      .filter(category => editingCategory ? category.id !== editingCategory.id : true)
+                      .map(category => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name} (Level {category.level})
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
