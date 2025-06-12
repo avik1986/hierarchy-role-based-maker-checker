@@ -62,8 +62,24 @@ export const EntityManagement = () => {
     { id: '5', name: 'Launch Date', type: 'date' },
   ];
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      categoryId: '',
+      geographyId: '',
+      attributeIds: [],
+    });
+    setEditingEntity(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name.trim()) {
+      toast({ title: "Entity name is required!", variant: "destructive" });
+      return;
+    }
     
     if (editingEntity) {
       setEntities(prev => prev.map(entity => 
@@ -94,8 +110,7 @@ export const EntityManagement = () => {
     }
     
     setIsDialogOpen(false);
-    setEditingEntity(null);
-    setFormData({ name: '', description: '', categoryId: '', geographyId: '', attributeIds: [] });
+    resetForm();
   };
 
   const handleEdit = (entity: Entity) => {
@@ -113,6 +128,13 @@ export const EntityManagement = () => {
   const handleDelete = (entityId: string) => {
     setEntities(prev => prev.filter(entity => entity.id !== entityId));
     toast({ title: "Entity deleted successfully!" });
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      resetForm();
+    }
   };
 
   const toggleAttribute = (attributeId: string) => {
@@ -140,7 +162,7 @@ export const EntityManagement = () => {
           <h1 className="text-3xl font-bold text-slate-900">Entity Management</h1>
           <p className="text-slate-600 mt-1">Combine attributes into reusable data objects.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
               <Plus size={18} className="mr-2" />
@@ -230,7 +252,7 @@ export const EntityManagement = () => {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button type="submit">

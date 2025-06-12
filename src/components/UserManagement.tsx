@@ -42,8 +42,35 @@ export const UserManagement = () => {
     categoryId: '',
   });
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      role: 'viewer',
+      geographyId: '',
+      categoryId: '',
+    });
+    setEditingUser(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name.trim()) {
+      toast({ title: "Name is required!", variant: "destructive" });
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      toast({ title: "Email is required!", variant: "destructive" });
+      return;
+    }
+    
+    if (!formData.phone.trim()) {
+      toast({ title: "Phone is required!", variant: "destructive" });
+      return;
+    }
     
     if (editingUser) {
       setLocalUsers(prev => prev.map(user => 
@@ -65,8 +92,7 @@ export const UserManagement = () => {
     }
     
     setIsDialogOpen(false);
-    setEditingUser(null);
-    setFormData({ name: '', email: '', phone: '', role: 'viewer', geographyId: '', categoryId: '' });
+    resetForm();
   };
 
   const handleEdit = (user: User) => {
@@ -87,6 +113,13 @@ export const UserManagement = () => {
     toast({ title: "User deleted successfully!" });
   };
 
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  };
+
   const getRoleColor = (role: UserRole) => {
     switch (role) {
       case 'admin': return 'bg-purple-100 text-purple-800';
@@ -104,7 +137,7 @@ export const UserManagement = () => {
           <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
           <p className="text-slate-600 mt-1">Manage users with roles, geography, and category scope.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
               <Plus size={18} className="mr-2" />
@@ -199,7 +232,7 @@ export const UserManagement = () => {
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button type="submit">
