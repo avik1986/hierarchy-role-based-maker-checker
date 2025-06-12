@@ -113,6 +113,11 @@ export const UserManagement = () => {
     toast({ title: "User deleted successfully!" });
   };
 
+  const handleCreateNew = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
   const handleDialogOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
     if (!open) {
@@ -137,112 +142,114 @@ export const UserManagement = () => {
           <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
           <p className="text-slate-600 mt-1">Manage users with roles, geography, and category scope.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <Plus size={18} className="mr-2" />
-              Create User
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
-              <DialogDescription>
-                {editingUser ? 'Update the user details below.' : 'Add a new user to the system.'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter full name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Enter email address"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="Enter phone number"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={formData.role} onValueChange={(value: UserRole) => setFormData(prev => ({ ...prev, role: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="checker">Checker</SelectItem>
-                      <SelectItem value="maker">Maker</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="geography">Geography (Optional)</Label>
-                  <Select value={formData.geographyId} onValueChange={(value) => setFormData(prev => ({ ...prev, geographyId: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select geography" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No restriction</SelectItem>
-                      <SelectItem value="1">United States</SelectItem>
-                      <SelectItem value="2">California</SelectItem>
-                      <SelectItem value="4">Los Angeles</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="category">Category (Optional)</Label>
-                  <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No restriction</SelectItem>
-                      <SelectItem value="1">Electronics</SelectItem>
-                      <SelectItem value="2">Mobile Phones</SelectItem>
-                      <SelectItem value="6">Clothing</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingUser ? 'Update' : 'Create'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          onClick={handleCreateNew}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        >
+          <Plus size={18} className="mr-2" />
+          Create User
+        </Button>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
+            <DialogDescription>
+              {editingUser ? 'Update the user details below.' : 'Add a new user to the system.'}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="role">Role</Label>
+                <Select value={formData.role} onValueChange={(value: UserRole) => setFormData(prev => ({ ...prev, role: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="checker">Checker</SelectItem>
+                    <SelectItem value="maker">Maker</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="geography">Geography (Optional)</Label>
+                <Select value={formData.geographyId} onValueChange={(value) => setFormData(prev => ({ ...prev, geographyId: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select geography" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No restriction</SelectItem>
+                    <SelectItem value="1">United States</SelectItem>
+                    <SelectItem value="2">California</SelectItem>
+                    <SelectItem value="4">Los Angeles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="category">Category (Optional)</Label>
+                <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No restriction</SelectItem>
+                    <SelectItem value="1">Electronics</SelectItem>
+                    <SelectItem value="2">Mobile Phones</SelectItem>
+                    <SelectItem value="6">Clothing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingUser ? 'Update' : 'Create'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>

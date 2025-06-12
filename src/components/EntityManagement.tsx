@@ -130,6 +130,11 @@ export const EntityManagement = () => {
     toast({ title: "Entity deleted successfully!" });
   };
 
+  const handleCreateNew = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
   const handleDialogOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
     if (!open) {
@@ -162,107 +167,109 @@ export const EntityManagement = () => {
           <h1 className="text-3xl font-bold text-slate-900">Entity Management</h1>
           <p className="text-slate-600 mt-1">Combine attributes into reusable data objects.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <Plus size={18} className="mr-2" />
-              Add Entity
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>{editingEntity ? 'Edit Entity' : 'Create New Entity'}</DialogTitle>
-              <DialogDescription>
-                {editingEntity ? 'Update the entity details below.' : 'Define a new entity by combining attributes.'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Entity Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter entity name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Category (Optional)</Label>
-                  <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No restriction</SelectItem>
-                      <SelectItem value="1">Electronics</SelectItem>
-                      <SelectItem value="6">Clothing</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+        <Button 
+          onClick={handleCreateNew}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        >
+          <Plus size={18} className="mr-2" />
+          Add Entity
+        </Button>
+      </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="geography">Geography (Optional)</Label>
-                  <Select value={formData.geographyId} onValueChange={(value) => setFormData(prev => ({ ...prev, geographyId: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select geography" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No restriction</SelectItem>
-                      <SelectItem value="1">United States</SelectItem>
-                      <SelectItem value="2">California</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="col-span-1"></div>
-              </div>
-
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{editingEntity ? 'Edit Entity' : 'Create New Entity'}</DialogTitle>
+            <DialogDescription>
+              {editingEntity ? 'Update the entity details below.' : 'Define a new entity by combining attributes.'}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Describe the purpose of this entity"
-                  rows={3}
+                <Label htmlFor="name">Entity Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter entity name"
+                  required
                 />
               </div>
-
               <div>
-                <Label>Select Attributes</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto border rounded-lg p-3">
-                  {availableAttributes.map((attribute) => (
-                    <div key={attribute.id} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`attr-${attribute.id}`}
-                        checked={formData.attributeIds.includes(attribute.id)}
-                        onChange={() => toggleAttribute(attribute.id)}
-                        className="rounded border-gray-300"
-                      />
-                      <Label htmlFor={`attr-${attribute.id}`} className="text-sm">
-                        {attribute.name} ({attribute.type})
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                <Label htmlFor="category">Category (Optional)</Label>
+                <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No restriction</SelectItem>
+                    <SelectItem value="1">Electronics</SelectItem>
+                    <SelectItem value="6">Clothing</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingEntity ? 'Update' : 'Create'}
-                </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="geography">Geography (Optional)</Label>
+                <Select value={formData.geographyId} onValueChange={(value) => setFormData(prev => ({ ...prev, geographyId: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select geography" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No restriction</SelectItem>
+                    <SelectItem value="1">United States</SelectItem>
+                    <SelectItem value="2">California</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+              <div className="col-span-1"></div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe the purpose of this entity"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label>Select Attributes</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                {availableAttributes.map((attribute) => (
+                  <div key={attribute.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`attr-${attribute.id}`}
+                      checked={formData.attributeIds.includes(attribute.id)}
+                      onChange={() => toggleAttribute(attribute.id)}
+                      className="rounded border-gray-300"
+                    />
+                    <Label htmlFor={`attr-${attribute.id}`} className="text-sm">
+                      {attribute.name} ({attribute.type})
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingEntity ? 'Update' : 'Create'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>
